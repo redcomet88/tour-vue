@@ -1,0 +1,12 @@
+/* 全局覆盖 Element UI 按钮样式 */
+.el-button--primary {
+    background-color: #545c64 !important; /* 黑色背景 */
+    border-color: #000000 !important; /* 黑色边框 */
+    color: #ffd04b !important; /* 金色文字 */
+}
+
+.el-button--primary:hover, .el-button--primary:focus {
+    background-color: #333333 !important; /* 深黑色背景 */
+    border-color: #333333 !important; /* 深黑色边框 */
+    color: #ffd04b !important; /* 金色文字 */
+}
