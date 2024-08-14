@@ -34,6 +34,9 @@ export default {
   name: 'Dashboard',
   components: {
     LineChart, BarChart, PieChart
+  },
+  mounted() {
+
   }
 };
 </script>
