@@ -1,193 +1,117 @@
 <template>
-  <div class="users-container">
-    <el-card class="box-card">
-      <div slot="header" class="header">
-        <span class="header-title">用户管理</span>
-        <div class="header-controls">
-          <el-input v-model="searchParam" placeholder="输入标题进行搜索" class="search-input"></el-input>
-          <el-button type="primary" @click="fetchData">搜索</el-button>
-          <el-button type="success" @click="handleAdd">添加用户</el-button>
+  <el-card>
+    <div class="chat-box" ref="chatBox">
+      <div v-for="(msg, index) in messages" :key="index" class="message">
+        <div v-if="msg.type === 'user'" class="user-message">
+          <img src="https://via.placeholder.com/40" alt="User" class="avatar" />
+          <div class="message-content user-message-content">{{ msg.content }}</div>
+        </div>
+        <div v-if="msg.type === 'bot'" class="bot-message">
+          <img src="https://via.placeholder.com/40" alt="Bot" class="avatar" />
+          <div class="message-content bot-message-content">{{ msg.content }}</div>
         </div>
       </div>
-      <el-table :data="records" style="width: 100%">
-        <el-table-column prop="id" label="ID" width="50"></el-table-column>
-        <el-table-column prop="username" label="用户名" min-width="180"></el-table-column>
-        <el-table-column prop="realname" label="姓名" min-width="180"></el-table-column>
-        <el-table-column prop="age" label="年龄" min-width="180"></el-table-column>
-        <el-table-column prop="job" label="职业" min-width="180"></el-table-column>
-        <el-table-column prop="phone" label="电话" min-width="180"></el-table-column>
-        <el-table-column prop="addr" label="地址" min-width="180"></el-table-column>
-<!--        <el-table-column prop="intro" label="签名" min-width="180"></el-table-column>-->
-        <el-table-column prop="email" label="邮箱"></el-table-column>
-        <el-table-column label="操作" width="180">
-          <template slot-scope="scope">
-            <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
-            <el-button @click="handleDelete(scope.row)" type="text" size="small">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-size="pageSize"
-          :total="totalItems"
-          layout="total, sizes, prev, pager, next, jumper"
-      />
-    </el-card>
-
-    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible">
-      <el-form :model="form">
-        <el-form-item label="用户名" :label-width="formLabelWidth">
-          <el-input v-model="form.username"></el-input>
-        </el-form-item>
-        <el-form-item label="姓名" :label-width="formLabelWidth">
-          <el-input v-model="form.realname"></el-input>
-        </el-form-item>
-        <!-- 年龄输入框 -->
-        <el-form-item label="年龄" :label-width="formLabelWidth">
-          <el-input-number
-              v-model="form.age"
-              :min="0"
-              :max="120"
-              size="small"
-          ></el-input-number>
-        </el-form-item>
-        <el-form-item label="地址" :label-width="formLabelWidth">
-          <el-input v-model="form.addr"></el-input>
-        </el-form-item>
-        <!-- 职业选择框 -->
-        <el-form-item label="职业" :label-width="formLabelWidth">
-          <el-select v-model="form.job" placeholder="请选择职业">
-            <el-option label="学生" value="学生"></el-option>
-            <el-option label="公务员" value="公务员"></el-option>
-            <el-option label="律师" value="律师"></el-option>
-            <el-option label="IT工程师" value="IT工程师"></el-option>
-            <el-option label="外卖员" value="外卖员"></el-option>
-            <el-option label="文员" value="文员"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="电话" :label-width="formLabelWidth">
-          <el-input v-model="form.phone"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" :label-width="formLabelWidth">
-          <el-input v-model="form.email"></el-input>
-        </el-form-item>
-        <el-form-item label="签名" :label-width="formLabelWidth">
-          <el-input v-model="form.intro"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
-      </div>
-    </el-dialog>
-  </div>
+    </div>
+    <div class="input-area">
+      <el-input
+          v-model="input"
+          placeholder="Type your message..."
+          @keyup.enter="sendMessage"
+          class="input-field"
+          :style="{ maxWidth: 'calc(100% - 100px)' }"
+      ></el-input>
+      <el-button type="primary" @click="sendMessage">Send</el-button>
+    </div>
+  </el-card>
 </template>
 
 <script>
-import {users, addUser, updateUser, deleteUser} from "@/api/user";
-
 export default {
   data() {
     return {
-      dialogTitle: '',
-      searchParam: '',
-      records: [],
-      dialogVisible: false,
-      form: {},
-      formLabelWidth: '80px',
-      totalItems: 0,
-      currentPage: 1,
-      pageSize: 10,
+      input: '',
+      messages: []
     };
   },
-  mounted() {
-    this.currentPage = 1
-    this.loadData()
-  },
   methods: {
-    fetchData() {
-      this.loadData()
+    sendMessage() {
+      if (this.input.trim() === '') return;
+
+      this.messages.push({ type: 'user', content: this.input });
+      const userInput = this.input;
+      this.input = '';
+
+      setTimeout(() => {
+        this.messages.push({ type: 'bot', content: `
+        You said: ${userInput}
+        You said: ${userInput}
+        You said: ${userInput}
+        You said: ${userInput}
+        You said: ${userInput}
+        You said: ${userInput}
+数据简介：本数据包括街道ID、交通指数、通过样本总行驶长度(m) 、平均行程车速（km/h）、通过样本总行程时间(s) 、 时间、时间片等7个字段。
+
+注：交通指数：越大越拥堵，划分五个等级，0-2 畅通，2-4 基本畅通，4-6 缓行，6-8 较拥堵，8-10 拥堵。时间片：一个时间片是5分钟。
+
+
+        ` });
+        this.scrollToBottom();
+      }, 500);
+
+      this.scrollToBottom();
     },
-    //加载数据
-    loadData() {
-      users(this.searchParam, this.currentPage, this.pageSize).then(res => {
-        this.records = res.data.data.records
-        this.totalItems = res.data.data.total
-      })
-    },
-    handleAdd() {
-      this.dialogTitle = '新增用户'
-      this.dialogVisible = true;
-      this.form = {};
-    },
-    handleEdit(record) {
-      this.dialogTitle = '编辑用户'
-      this.dialogVisible = true;
-      this.form = {...record};
-    },
-    handleDelete(record) {
-      deleteUser(record.id).then(res => {
-        this.$message(res); // 使用封装的 $message 函数
-      })
-    },
-    handleSave() {
-      if (this.form.id) {
-        updateUser(this.form.id, this.form).then(res => {
-          // console.log(res.data.message)
-          this.$message(res); // 使用封装的 $message 函数
-        })
-      } else {
-        addUser(this.form).then(res => {
-          console.log(res.data.message)
-          this.$message(res); // 使用封装的 $message 函数
-        })
-      }
-      this.dialogVisible = false;
-      this.loadData()
-    },
-    handleCurrentChange(page) {
-      this.currentPage = page;
-      this.loadData();
-    },
-    handleSizeChange(size) {
-      this.pageSize = size;
-      this.loadData();
-    },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
+      });
+    }
   }
-}
+};
 </script>
 
 <style scoped>
-.tours-container {
-  padding: 20px;
+.chat-box {
+  height: 400px;
+  overflow-y: auto;
+  padding: 10px;
+  border-bottom: 1px solid #dcdfe6;
 }
-
-.header {
+.input-area {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  margin-top: 10px;
 }
-
-.dialog-footer {
-  text-align: right;
-}
-
-.header-title {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.header-controls {
+.message {
+  margin: 10px 0;
   display: flex;
   align-items: center;
 }
-
-.search-input {
-  width: 300px;
-  margin-right: 10px; /* Adjust spacing between input and buttons */
+.user-message, .bot-message {
+  display: flex;
+  align-items: center;
+}
+.avatar {
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.input-field {
+  flex: 1;
+  margin-right: 10px;
+  max-width: calc(100% - 100px);
+}
+.message-content {
+  max-width: 100%; /* 确保消息内容框不超过聊天框宽度 */
+  background-color: #f0f0f0; /* 随意选择背景颜色 */
+  border-radius: 5px; /* 圆角 */
+  padding: 10px; /* 内边距 */
+  overflow-wrap: break-word; /* 使长文本换行 */
+  white-space: normal; /* 允许文本在标签内换行 */
+  word-wrap: break-word; /* 兼容旧版浏览器 */
+}
+.user-message-content {
+  background-color: #d1e7dd; /* 用户消息的背景颜色 */
+}
+.bot-message-content {
+  background-color: #cfe2ff; /* 机器人消息的背景颜色 */
 }
 </style>

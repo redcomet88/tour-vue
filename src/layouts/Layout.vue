@@ -15,6 +15,9 @@
         <el-menu-item index="/users" @click="navigateTo('/users')">
           <i class="el-icon-s-custom"></i>
           用户管理</el-menu-item>
+        <el-menu-item index="/users" @click="navigateTo('/chat')">
+          <i class="el-icon-s-custom"></i>
+          模拟聊天</el-menu-item>
         <el-menu-item index="/profile" @click="navigateTo('/profile')">
           <i class="el-icon-s-tools"></i>
           个人设置</el-menu-item>

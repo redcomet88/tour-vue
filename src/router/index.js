@@ -39,6 +39,11 @@ const routes = [
                 path: 'tours',
                 component:()=>  import('@/views/Tours'),
                 name: 'Tours'
+            },
+            {
+                path: 'chat',
+                component:()=>  import('@/views/Chat'),
+                name: 'Chat'
             }
             // 其他子路由
         ]
