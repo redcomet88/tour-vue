@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import {register} from "@/api/user";
+
 export default {
   data() {
     return {
@@ -64,8 +66,15 @@ export default {
   },
   methods: {
     handleRegister() {
+      // 检查两个密码是否相等
+      if (this.form.password !== this.form.password2) {
+        this.$message('两次输入的密码不一致', 'error'); //上一期中封装的消息插件
+        return
+      }
       console.log('注册', this.form);
-      // 这里可以添加登录逻辑
+      register(this.form).then((res)=>{
+        this.$message(res)  //上一期中封装的消息插件
+      })
     },
     resetForm() {
       this.form.username = '';

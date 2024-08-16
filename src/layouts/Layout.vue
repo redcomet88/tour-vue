@@ -32,7 +32,7 @@
           <div class="user-info">
             <img :src="avatarUrl" alt="Avatar" class="avatar">
             <span class="username">{{ username }}</span>
-            <el-button type="text" >退出</el-button>
+            <el-button type="text"  @click="handleLogout">退出</el-button>
           </div>
         </div>
       </el-header>
@@ -50,14 +50,28 @@ export default {
   data() {
     return {
       activeIndex: '/dashboard',
-      username: '麦麦大数据', // 替换为实际用户名
+      username: '未登录', // 替换为实际用户名
       // avatarUrl: 'https://via.placeholder.com/40' // 替换为实际头像 URL
       avatarUrl: require("@/assets/avatar.png") // 也可以使用 require 语法引入图片
     };
   },
+  created() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const isLoggedIn = localStorage.getItem('isLogin') === 'true'; // 转换为布尔值
+
+    if (isLoggedIn) {
+      console.log('用户已登录:', user);
+      this.username = user.username
+      // 这里可以设置用户状态到组件的 data 中
+    } else {
+      this.$message('用户未登录', 'error');
+      this.$router.push('/login')
+    }
+  },
   mounted() {
     console.log('当前路径:', this.$route.path)
     this.activeIndex = this.$route.path
+
   },
   methods: {
     navigateTo(path) {
@@ -66,6 +80,12 @@ export default {
         this.activeIndex = path;
         this.$router.push(path);
       }
+    },
+    handleLogout(){
+      // 清除用户信息和登录状态
+      localStorage.removeItem('user');
+      localStorage.removeItem('isLogin');
+      this.$router.push('/login');
     }
   }
 };

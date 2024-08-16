@@ -41,6 +41,8 @@
 </template>
 
 <script>
+import {login} from "@/api/user";
+
 export default {
   data() {
     return {
@@ -53,7 +55,17 @@ export default {
   methods: {
     handleLogin() {
       console.log('登录', this.form);
-      // 这里可以添加登录逻辑
+      login(this.form).then(res=>{
+        this.$message(res) //上一期中封装的消息插件
+        // 假设 res.data 包含用户信息
+        if (res.data && res.data.code==0) {
+          // 保存用户信息和登录状态
+          localStorage.setItem('user', JSON.stringify(res.data.data)); // 保存用户信息
+          localStorage.setItem('isLogin', 'true'); // 标记用户为已登录
+          // 跳转到主页
+          this.$router.push('/');
+        }
+      })
     },
     resetForm() {
       this.form.username = '';
